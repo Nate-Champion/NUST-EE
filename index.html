@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haptic Portal</title>
+    
+    <link rel="prefetch" href="https://nate-champion.github.io/PNEC-TimeTable/">
+    <link rel="prefetch" href="https://nate-champion.github.io/StudHUB/">
+
+    <style>
+        :root {
+            --bg-base: #111116; /* Near-black, slightly warmer */
+            --card-bg: #1a1a22;
+            --card-hover: #22222d;
+            --text-main: #fcfcfc;
+            --text-sub: #a0a0b0;
+            --border-color: #2a2a3a;
+            
+            /* Softer, "Cuter" modern accent colors */
+            --accent-1: #ffadd2; /* Soft Pink */
+            --accent-1-glow: rgba(255, 173, 210, 0.3);
+            --accent-2: #a0c4ff; /* Soft Blue */
+            --accent-2-glow: rgba(160, 196, 255, 0.3);
+            --accent-3: #b9fbc0; /* Soft Green */
+            --accent-3-glow: rgba(185, 251, 192, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            overflow: hidden; /* Prevent scroll animation during entry */
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Torph-style Animated Title */
+        .animated-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            display: flex;
+            justify-content: center;
+            gap: 0.1em;
+        }
+
+        .animated-title span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px) skewY(5deg);
+            animation: torphIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes torphIn {
+            to {
+                opacity: 1;
+                transform: translateY(0) skewY(0deg);
+            }
+        }
+
+        /* Modern Grid & Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .haptic-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2.5rem 1.5rem;
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); /* Smooth 'torph' style transition */
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        /* Haptic feedback 'ripple' visual */
+        .haptic-card .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(0);
+            animation: rippleEffect 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes rippleEffect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Hover states with subtle glows */
+        .haptic-card:hover {
+            background-color: var(--card-hover);
+            transform: translateY(-8px) scale(1.01);
+            border-color: #404050;
+        }
+
+        .haptic-card.drive:hover { box-shadow: 0 15px 30px -10px var(--accent-1-glow); }
+        .haptic-card.sched:hover { box-shadow: 0 15px 30px -10px var(--accent-2-glow); }
+        .haptic-card.track:hover { box-shadow: 0 15px 30px -10px var(--accent-3-glow); }
+
+        .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .haptic-card:hover .icon-wrapper {
+            transform: scale(1.1) rotate(-3deg);
+        }
+
+        /* Icon Colors */
+        .drive .icon-wrapper { background-color: rgba(255, 173, 210, 0.1); border: 1px solid var(--accent-1); }
+        .sched .icon-wrapper { background-color: rgba(160, 196, 255, 0.1); border: 1px solid var(--accent-2); }
+        .track .icon-wrapper { background-color: rgba(185, 251, 192, 0.1); border: 1px solid var(--accent-3); }
+
+        .haptic-card h2 {
+            font-size: 1.4rem;
+            margin-bottom: 0.6rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .haptic-card p {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-width: 80%;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 600px) {
+            .animated-title { font-size: 2.2rem; }
+            .haptic-card { padding: 2rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="animated-title" id="mainTitle">
+            </h1>
+        
+        <div class="grid">
+            <div class="haptic-card drive" data-url="https://drive.google.com/drive/folders/1tDFa62rsIlqEqzceLALHuTg-BDlltLmT" data-haptic="light">
+                <div class="icon-wrapper">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffadd2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"></path>
+                        <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                        <path d="M3 15h6"></path><path d="M6 12v6"></path>
+                    </svg>
+                </div>
+                <h2>Google Drive</h2>
+                <p>Cloud storage and shared class resources.</p>
+            </div>
+
+            <div class="haptic-card sched" data-url="https://nate-champion.github.io/PNEC-TimeTable/" data-haptic="medium">
+                <div class="icon-wrapper">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a0c4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                </div>
+                <h2>Schedule</h2>
+                <p>View your weekly timetable and class locations.</p>
+            </div>
+
+            <div class="haptic-card track" data-url="https://nate-champion.github.io/StudHUB/" data-haptic="heavy">
+                <div class="icon-wrapper">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b9fbc0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <h2>Deadlines</h2>
+                <p>Track upcoming assignments and project tasks.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Torph Text Animation Setup
+        const titleText = "Haptic Portal";
+        const titleContainer = document.getElementById('mainTitle');
+        
+        // Split text into spans for individual character animation
+        titleText.split('').forEach((char, index) => {
+            const span = document.createElement('span');
+            span.textContent = char === ' ' ? '\u00A0' : char; // Handle spaces
+            span.style.animationDelay = `${index * 50}ms`; // Staggered delay
+            titleContainer.appendChild(span);
+        });
+
+        // 2. Web Haptics Engine (Inspired by haptics.lochie.me)
+        // Check if the vibration API is supported
+        const canVibrate = window.navigator && window.navigator.vibrate;
+
+        // Define haptic patterns (ms)
+        const hapticPatterns = {
+            light: [10],           // Short, subtle tap
+            medium: [30],          // Noticeable pulse
+            heavy: [60],           // Stronger, soft thump
+            success: [20, 50, 20], // Light, pause, light (soft 'pop')
+        };
+
+        function triggerHaptic(patternName) {
+            if (canVibrate) {
+                const pattern = hapticPatterns[patternName] || hapticPatterns.medium;
+                window.navigator.vibrate(pattern);
+            } else {
+                console.log(`Haptic [${patternName}] requested (Vibration API not supported on this device).`);
+            }
+        }
+
+        // 3. Card Interaction Logic (Click, Redirect, Visual Haptic)
+        document.querySelectorAll('.haptic-card').forEach(card => {
+            // Visual feedback function (Ripple)
+            function createVisualFeedback(e, cardEl) {
+                const rect = cardEl.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                
+                // Set ripple color based on card accent
+                const computedStyle = getComputedStyle(cardEl);
+                if (cardEl.classList.contains('drive')) ripple.style.background = 'rgba(255, 173, 210, 0.2)';
+                if (cardEl.classList.contains('sched')) ripple.style.background = 'rgba(160, 196, 255, 0.2)';
+                if (cardEl.classList.contains('track')) ripple.style.background = 'rgba(185, 251, 192, 0.2)';
+
+                cardEl.appendChild(ripple);
+
+                // Remove ripple element after animation ends
+                ripple.addEventListener('animationend', () => {
+                    ripple.remove();
+                });
+            }
+
+            card.addEventListener('click', function(e) {
+                // Determine the specified haptic strength from data attribute
+                const hapticStrength = this.getAttribute('data-haptic') || 'medium';
+                
+                // A. Trigger Haptic Feedback (Vibration)
+                triggerHaptic(hapticStrength);
+
+                // B. Trigger Visual Feedback (Ripple effect inside the card)
+                createVisualFeedback(e, this);
+
+                // C. Redirect (after short delay for feedback)
+                const targetUrl = this.getAttribute('data-url');
+                if (targetUrl) {
+                    // Slight delay allows the haptic pulse and ripple to be felt/seen
+                    setTimeout(() => {
+                        window.location.href = targetUrl;
+                    }, 200); 
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
